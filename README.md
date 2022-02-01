@@ -5,5 +5,5 @@
 `python -m pip install -r requirements.txt`
 
 ### reference
-see doc directory
+see docs directory or https://kosmos-lab.github.io/python-kosmos-client/ 
 
