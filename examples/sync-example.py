@@ -1,6 +1,6 @@
+
 import time
 import logging
-
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.INFO)
 console = logging.StreamHandler()
@@ -40,36 +40,25 @@ if __name__ == '__main__':
                 "examples": [
 
                 ],
-                "additionalProperties": False,
-                "title": "TutorialOccupancy",
+                "additionalProperties": True,
+                "title": "NoSchema",
                 "type": "object",
-                "required": ["occupancy"],
                 "properties": {
-                    "occupancy": {
-                        "description": "Defines whether the sensors detected motion",
-                        "readOnly": False,
-                        "title": "occupancy",
-                        "type": "boolean"
-                    }
                 },
-                "$id": "https://kosmos-lab.de/schema/TutorialOccupancy2.json"
+                "$id": "https://kosmos-lab.de/schema/TestNoSchema.json"
             })
 
         except KosmosError as e:
-            _LOGGER.info(e)
+            _LOGGER.warn(e)
             pass
-
         try:
-            kosmos.add_device("tutorial_occupancy_1", {"occupancy": False},
-                              schema="https://kosmos-lab.de/schema/TutorialOccupancy2.json")
-        except KosmosError as e:
-            _LOGGER.info(e)
+            _LOGGER.info(kosmos.get_schema("https://kosmos-lab.de/schema/TestNoSchema.json"))
+        except KosmosNotFoundError as e:
+            _LOGGER.warn(e)
             pass
-
-        while kosmos.is_connected():
-            kosmos.set_attribute("tutorial_occupancy_1", "occupancy", True)
-            time.sleep(60)
-            kosmos.set_attribute("tutorial_occupancy_1", "occupancy", False)
-            time.sleep(60)
-
-        # kosmos.stop()
+        try:
+            _LOGGER.info(kosmos.list_schemas())
+        except KosmosError as e:
+            _LOGGER.warn(e)
+            pass
+        #kosmos.stop()
