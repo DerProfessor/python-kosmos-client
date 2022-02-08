@@ -1,7 +1,7 @@
 import setuptools
 setuptools.setup(
     name="kosmos-client",
-    version="0.8.2",
+    version="0.8.3",
     author="Jan Janssen",
     author_email="Jan.Janssen@dfki.de",
     description="Client to connect to the KosmoS Platform",
