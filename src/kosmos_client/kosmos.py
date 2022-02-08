@@ -292,7 +292,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
     __regex_state_pattern = re.compile(r"^device\/(?P<uuid>.*?)\/state:(?P<payload>.*)$")
     __regex_config_pattern = re.compile(r"^device\/(?P<uuid>.*?)\/config:(?P<payload>.*)$")
 
-    def __init__(self, base: str, username: str, password: str, subs: dict = None, type="PythonClient"):
+    def __init__(self, base: str, username: str, password: str, subs: dict = None, type="PythonClient",debug=False):
         """
         creates a new instance of the Kosmos Client
 
@@ -348,6 +348,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
         self.__username = username
         self.__password = password
         self.__type = type
+        self.__debug = debug
 
     def __enter__(self):
         # _LOGGER.info("enter")
@@ -358,7 +359,8 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
         return self
 
     def __post_event(self, event_type: KosmosEvent, data):
-        # _LOGGER.info(f"publishing {event_type} with data:{data}")
+        if self.__debug:
+            _LOGGER.info(f"publishing {event_type} with data:{data}")
         if event_type not in self.__subscribers:
             return
         for fn in self.__subscribers[event_type]:
@@ -372,7 +374,8 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             message = ws
 
         message = str(message)
-        # _LOGGER.info(f"received {message}")
+        if self.__debug:
+            _LOGGER.info(f"received {message}")
         if message == "auth successful":
             self.__connected = True
             self.__post_event(KosmosEvent.auth_ok, {})
@@ -460,12 +463,14 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
 
     def __on_close(self, ws=None, status=None, message=None):
         self.__connected = False
-        # _LOGGER.info(f"kosmos closed")
+        if self.__debug:
+            _LOGGER.info(f"kosmos closed")
         self.__post_event(KosmosEvent.connection_lost, data={'status': status, 'message': message})
         pass
 
     def __on_open(self, ws=None):
-        # _LOGGER.info(f"kosmos opened")
+        if self.__debug:
+            _LOGGER.info(f"kosmos opened")
 
         # self.connected = True
         self.__ws.send(f'user/auth:{str({"user": self.__username, "pass": self.__password})}')
