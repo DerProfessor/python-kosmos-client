@@ -375,7 +375,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
 
         message = str(message)
         if self.__debug:
-            _LOGGER.info(f"received {message}")
+            _LOGGER.info(f"received: {message}")
         if message == "auth successful":
             self.__connected = True
             self.__post_event(KosmosEvent.auth_ok, {})
@@ -473,7 +473,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             _LOGGER.info(f"kosmos opened")
 
         # self.connected = True
-        self.__ws.send(f'user/auth:{str({"user": self.__username, "pass": self.__password})}')
+        self.__ws.send(f'user/auth:{json.dumps({"user": self.__username, "pass": self.__password})}')
         self.__ws.send(f'user/type:{self.__type}')
         self.__post_event(KosmosEvent.connection_established, {})
 
