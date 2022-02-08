@@ -468,7 +468,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
         # _LOGGER.info(f"kosmos opened")
 
         # self.connected = True
-        self.__ws.send(f'user/auth:{str({"user": self.__username, "password": self.__password})}')
+        self.__ws.send(f'user/auth:{str({"user": self.__username, "pass": self.__password})}')
         self.__ws.send(f'user/type:{self.__type}')
         self.__post_event(KosmosEvent.connection_established, {})
 
