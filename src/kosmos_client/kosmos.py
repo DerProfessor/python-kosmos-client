@@ -201,6 +201,7 @@ class KosmosEvent(Enum):
                 the kosmos client
         """
 
+
 @dataclass_json(letter_case=LetterCase.CAMEL)  # we need this to accept the lastUpdate as last_update and so on
 @dataclass
 class KosmosDevice:
@@ -291,7 +292,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
     __regex_state_pattern = re.compile(r"^device\/(?P<uuid>.*?)\/state:(?P<payload>.*)$")
     __regex_config_pattern = re.compile(r"^device\/(?P<uuid>.*?)\/config:(?P<payload>.*)$")
 
-    def __init__(self, base: str, username: str, password: str, subs: dict = None):
+    def __init__(self, base: str, username: str, password: str, subs: dict = None, type="PythonClient"):
         """
         creates a new instance of the Kosmos Client
 
@@ -324,6 +325,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
 
         """
         threading.Thread.__init__(self)
+
         self.__ws = None
         self.__connected = False
         self.__stopped = False
@@ -345,6 +347,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
         self.__base = base
         self.__username = username
         self.__password = password
+        self.__type = type
 
     def __enter__(self):
         # _LOGGER.info("enter")
@@ -369,7 +372,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             message = ws
 
         message = str(message)
-        #_LOGGER.info(f"received {message}")
+        # _LOGGER.info(f"received {message}")
         if message == "auth successful":
             self.__connected = True
             self.__post_event(KosmosEvent.auth_ok, {})
@@ -465,8 +468,8 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
         # _LOGGER.info(f"kosmos opened")
 
         # self.connected = True
-        self.__ws.send('user/auth:{"user":"' + self.__username + '","pass":"' + self.__password + '"}')
-        self.__ws.send('user/type:PythonClient')
+        self.__ws.send(f'user/auth:{str({"user": self.__username, "password": self.__password})}')
+        self.__ws.send(f'user/type:{self.__type}')
         self.__post_event(KosmosEvent.connection_established, {})
 
         def pinger(*args):
