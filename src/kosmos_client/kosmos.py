@@ -191,7 +191,15 @@ class KosmosEvent(Enum):
             device : KosmosDevice 
                 the new device that was found                    
         """
+    init_done = auto()
+    """
+        will be triggered once the connection is fully established and the initial sync was done
 
+        Parameter
+        ---------
+            kosmos : KosmosClient
+                the kosmos client
+        """
 
 @dataclass_json(letter_case=LetterCase.CAMEL)  # we need this to accept the lastUpdate as last_update and so on
 @dataclass
@@ -389,6 +397,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
                         self.__post_event(event_type=KosmosEvent.device_created, data={'device': dev})
                     else:  # we might as well "update" it here
                         self.__devices[dev.uuid] = dev
+                self.__post_event(event_type=KosmosEvent.init_done, data={})
                 self.__connected = True
                 return
             m = self.__regex_state_pattern.match(message)

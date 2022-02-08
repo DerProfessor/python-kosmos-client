@@ -1,9 +1,12 @@
-# KosmoS Python API v0.7
+# KosmoS Python API
 
-## requirements
-### install requirements
-`python -m pip install -r requirements.txt`
+python library to communicate with the KosmoS infrastructure.
 
-### reference
+
+## install with pip
+`pip install kosmos-client`
+
+## examples
+see examples directory
+## reference
 see docs directory or https://kosmos-lab.github.io/python-kosmos-client/ 
-
