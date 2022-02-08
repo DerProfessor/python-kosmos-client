@@ -40,6 +40,6 @@ search = "__version__ = '{current_version}'"
 
 # Or run some commands after the git tag and the branch
 # have been pushed:
-#  [[after_push]]
-#  name = "publish"
-#  cmd = "./publish.sh"
+[[after_push]]
+name = "publish"
+cmd = "rm dist/* && python3 -m build && twine upload dist/*"
