@@ -8,7 +8,7 @@ setuptools.setup(
     long_description="README",
     # long_description_content_type="text/markdown",
     url="https://kosmos-lab.de/python-client/",
-    install_requires=["websocket-client", "requests", "dataclasses-json"],
+    install_requires=["websocket-client", "requests", "dataclasses-json","awaits"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

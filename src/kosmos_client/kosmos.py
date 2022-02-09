@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import _thread
+import asyncio
 import dataclasses
 import json
 import logging
@@ -9,6 +10,7 @@ import sys
 import threading
 import time
 import requests
+from awaits.awaitable import awaitable
 
 from typing import Callable, Optional
 
@@ -580,6 +582,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
         """
         self.__ws.close()
 
+    @awaitable
     def get_device(self, uuid: str) -> KosmosDevice:
         """
         get the device from internal cache if possible - get from api otherwise
@@ -619,7 +622,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             self.__do_request('GET', "/device/get", params={"id": uuid}, wanted_status=200).json())
         # self.__devices[uuid] = d DONT cache get api - because they are not always accurate at the next time we want to get the data
         return d
-
+    @awaitable
     def set(self, device: str | KosmosDevice, value: dict[str, any]) -> None:
         """
         Set the state of a device in the kosmos backend
@@ -667,6 +670,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             return
         raise ValueError(f"could not parse Parameter device ({device})")
 
+    @awaitable
     def set_attribute(self, device: str | KosmosDevice, attribute: str | int | float,
                       value: str | int | bool | float | list | tuple | None | dict):
         """
@@ -718,6 +722,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             return
         raise ValueError(f"could not parse Parameter device ({device})")
 
+    @awaitable
     def add_device(self, uuid: str, state: dict = {}, schema: str = "https://kosmos-lab.de/schema/NoSchema.json",
                    scopes: KosmosScopeList = None) -> None:
         """
@@ -769,6 +774,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
         self.__do_request("POST", "/device/add", body=json.dumps(js, cls=_EnhancedJSONEncoder), wanted_status=204)
         return
 
+    @awaitable
     def delete_device(self, device: str | KosmosDevice) -> None:
         """
         deletes a device from Kosmos
@@ -810,6 +816,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             return
         raise ValueError(f"could not parse Parameter device ({device})")
 
+    @awaitable
     def delete_schema(self, schemaid: str) -> None:
         """
         deletes as schema from kosmos
@@ -840,6 +847,8 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
         self.__do_request("DELETE", "/schema/delete", params={'id': schemaid},
                           wanted_status=204)
 
+
+    @awaitable
     def get_schema(self, schemaid: str) -> dict:
         """
         get a schema back from kosmos
@@ -871,6 +880,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
 
         return self.__do_request('GET', f"{self.__base}/schema/get", params={"id": schemaid}, wanted_status=200).json()
 
+    @awaitable
     def list_schemas(self) -> list[dict]:
         """
         list all schemas in the kosmos
@@ -894,6 +904,31 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
 
         return self.__do_request('GET', f"{self.__base}/schema/list", wanted_status=200).json()
 
+    @awaitable
+    def list_schemas_async(self) -> list[dict]:
+        """
+        list all schemas in the kosmos
+
+        Returns
+        -------
+        List with currently known Schemas (List of Dicts)
+
+        Raises
+        -------
+        KosmosAuthInvalid
+            the auth was invalid
+        KosmosForbidden
+            the auth has not sufficient access the list of schemas
+        KosmosError
+            another error occurred
+        Examples
+        --------
+        >>> print(kosmos.list_schemas())
+        """
+
+        return self.__do_request('GET', f"{self.__base}/schema/list", wanted_status=200).json()
+
+    @awaitable
     def add_schema(self, schema: dict) -> None:
         """
         add a schema to kosmos
@@ -933,6 +968,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
 
         self.__do_request("POST", url="/schema/add", body=schema, wanted_status=200)
 
+    @awaitable
     def add_scope(self, scope: str | KosmosScope) -> KosmosScope:
         """
         add a scope to kosmos
@@ -964,6 +1000,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             return KosmosScope.from_dict_(
                 self.__do_request("POST", url="/scope/add", body={"name": scope}, wanted_status=200).json())
 
+    @awaitable
     def get_scope(self, scope: str | int) -> KosmosScope:
         """
         add a scope to kosmos
@@ -995,6 +1032,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             return KosmosScope.from_dict_(
                 self.__do_request("GET", url="/scope/get", body={"name": scope}, wanted_status=200).json())
 
+    @awaitable
     def delete_scope(self, scope: str | int | KosmosScope) -> None:
         """
         delete a scope from kosmos
@@ -1029,6 +1067,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             else:
                 self.__do_request("DELETE", url="/scope/delete", body={"name": scope.name}, wanted_status=204)
 
+    @awaitable
     def set_location(self, device: str | KosmosDevice, location: KosmosLocation) -> None:
         """
         set the location of a device
@@ -1062,6 +1101,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             return
         raise ValueError(f"could not parse Parameter device ({device})")
 
+    @awaitable
     def get_location(self, device: str | KosmosDevice) -> KosmosLocation:
         """
         gets the location of a given UUID back from kosmos
@@ -1108,6 +1148,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             raise KosmosNotFoundError(f"could not find location for : {uuid}")
         return KosmosError()
 
+    @awaitable
     def login(self):
         """
         Try to login
