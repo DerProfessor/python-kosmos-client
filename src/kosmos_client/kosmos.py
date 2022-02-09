@@ -292,7 +292,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
     __regex_state_pattern = re.compile(r"^device\/(?P<uuid>.*?)\/state:(?P<payload>.*)$")
     __regex_config_pattern = re.compile(r"^device\/(?P<uuid>.*?)\/config:(?P<payload>.*)$")
 
-    def __init__(self, base: str, username: str, password: str, subs: dict = None, type="PythonClient",debug=False):
+    def __init__(self, base: str, username: str, password: str, subs: dict = None, type="PythonClient", debug=False):
         """
         creates a new instance of the Kosmos Client
 
@@ -1108,14 +1108,36 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             raise KosmosNotFoundError(f"could not find location for : {uuid}")
         return KosmosError()
 
-    def __refresh_token(self):
+    def login(self):
+        """
+        Try to login
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        True if login succeeded
+
+        Raises
+        -------
+        KosmosAuthInvalid
+            the auth was invalid
+        KosmosError
+            anything else went wrong
+        """
+        return self.__refresh_token()
+
+    def __refresh_token(self) -> bool:
         r = requests.post(f"{self.__base}/user/login", data={"user": self.__username, "pass": self.__password})
         if r.status_code == 200:
             # _LOGGER.info(f"logged in with token:{r.text}")
             self.__token = r.text
+            return True
         else:
             _LOGGER.error(f"login FAILED {r.status_code} {r.text}")
             self.__token = None
+        return False
 
     def __do_request(self, method: str, url: str, params: dict = None, body: str = None, tries_left: int = 1,
                      wanted_status: int = None) -> Response:
@@ -1178,7 +1200,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
                 # we cannot fix 404, dont try again
                 raise KosmosNotFoundError(f"{r.reason} {r.text}")
             if r.status_code == 403:
-                # we cannot fix 409, dont try again  if its already there it is already there
+                # we cannot fix 403, dont try again
                 raise KosmosForbidden(f"{r.reason} {r.text}")
             if tries_left > 0:
                 # check if we would be allowed to try again
