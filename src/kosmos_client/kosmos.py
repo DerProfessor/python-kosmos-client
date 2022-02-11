@@ -479,6 +479,7 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
     def __on_error(self, ws=None, error=None):
         self.__connected = False
         _LOGGER.info(f"kosmos error: {error}")
+        self.__post_event(KosmosEvent.connection_lost, data={'status': 'error', 'message': error})
 
         pass
 
