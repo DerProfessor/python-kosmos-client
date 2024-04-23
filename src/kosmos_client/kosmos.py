@@ -10,7 +10,6 @@ import sys
 import threading
 import time
 import requests
-from aioify import aioify
 
 from typing import Callable, Optional
 
@@ -30,6 +29,12 @@ console = logging.StreamHandler()
 console.setLevel(logging.INFO)
 # add the handler to the root logger
 _LOGGER.addHandler(console)
+
+async_supported = sys.version_info < (3, 10)
+if async_supported:
+    from aioify import aioify
+else:
+    _LOGGER.warn("Async calls are unsupported in Python 3.10 or higher. Disabling async support.")
 
 from enum import Enum, auto
 
@@ -328,22 +333,24 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
         """
         threading.Thread.__init__(self)
         # create our async wrappers, those do exactly what the sync version does - but are awaitable
-        self.get_device_async = aioify(obj=self.get_device)
-        self.set_async = aioify(obj=self.set)
-        self.set_attribute_async = aioify(obj=self.set_attribute)
-        self.get_schema_async = aioify(obj=self.get_schema)
-        self.add_device_async = aioify(obj=self.add_device)
-        self.delete_device_async = aioify(obj=self.delete_device)
-        self.delete_schema_async = aioify(obj=self.delete_schema)
-        self.list_devices_async = aioify(obj=self.list_devices)
-        self.list_schemas_async = aioify(obj=self.list_schemas)
-        self.add_schema_async = aioify(obj=self.add_schema)
-        self.add_scope_async = aioify(obj=self.add_scope)
-        self.get_scope_async = aioify(obj=self.get_scope)
-        self.delete_scope_async = aioify(obj=self.delete_scope)
-        self.set_location_async = aioify(obj=self.set_location)
-        self.get_location_async = aioify(obj=self.get_location)
-        self.login_async = aioify(obj=self.login)
+
+        if async_supported:
+            self.get_device_async = aioify(obj=self.get_device)
+            self.set_async = aioify(obj=self.set)
+            self.set_attribute_async = aioify(obj=self.set_attribute)
+            self.get_schema_async = aioify(obj=self.get_schema)
+            self.add_device_async = aioify(obj=self.add_device)
+            self.delete_device_async = aioify(obj=self.delete_device)
+            self.delete_schema_async = aioify(obj=self.delete_schema)
+            self.list_devices_async = aioify(obj=self.list_devices)
+            self.list_schemas_async = aioify(obj=self.list_schemas)
+            self.add_schema_async = aioify(obj=self.add_schema)
+            self.add_scope_async = aioify(obj=self.add_scope)
+            self.get_scope_async = aioify(obj=self.get_scope)
+            self.delete_scope_async = aioify(obj=self.delete_scope)
+            self.set_location_async = aioify(obj=self.set_location)
+            self.get_location_async = aioify(obj=self.get_location)
+            self.login_async = aioify(obj=self.login)
 
 
 
