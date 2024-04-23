@@ -34,7 +34,7 @@ async_supported = sys.version_info < (3, 10)
 if async_supported:
     from aioify import aioify
 else:
-    _LOGGER.warn("Async calls are unsupported in Python 3.10 or higher. Disabling async support.")
+    _LOGGER.warn("Async calls are unsupported in Python 3.10 or higher for the KosmoS client. Disabling async support.")
 
 from enum import Enum, auto
 
