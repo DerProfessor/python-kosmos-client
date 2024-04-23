@@ -1183,6 +1183,42 @@ class KosmosClient(websocket.WebSocketApp, threading.Thread):
             anything else went wrong
         """
         return self.__refresh_token()
+    
+    def send_message_kiosk(self, type: str, value: Optional[str], target: str) -> None:
+        """
+        Sends a message to the kosmos kiosk plugin with.
+
+        Parameters
+        ----------
+        type : str
+            The type of the message
+        value : Optional[str]
+            The value that accompanies the given type 
+        target : str
+             the name of the target the message should be send to
+
+        Raises
+        -------
+        KosmosAuthInvalid
+            the auth was invalid
+        KosmosForbidden
+            the auth has not sufficient access to delete the device
+        KosmosConflict
+            the set could not be executed
+        KosmosError
+            another error occurred
+
+        Examples
+        --------
+        >>> kosmos.send_kiosk_message("show-image", "value": "http://virt/example-image, "target": "virt_frame")
+
+        Send kiosk a message to show an image with specified image source on a target device.
+        """
+        if value is None:
+            json_body = json.dumps({"type": type, "target": target})
+        else:
+            json_body = json.dumps({"type": type, "value": value, "target": target})
+        self.__do_request("POST", "/kiosk/sendMessage", body=json_body, wanted_status=204)
 
     def __refresh_token(self) -> bool:
         r = requests.post(f"{self.__base}/user/login", data={"user": self.__username, "pass": self.__password})
